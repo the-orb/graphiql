@@ -1,0 +1,83 @@
+query Query1($vaderId: String!) {
+  all: characters(before: "3", last: 2) {
+    totalCount
+    edges {
+      node {
+        id
+        name
+      }
+      cursor
+    }
+    pageInfo {
+      hasPreviousPage
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+  luke: human(id: "1") {
+    ...HumanFragment
+  }
+  r2d2: hero {
+    ...CharacterFragment
+  }
+  vader: human(id: $vaderId) {
+    ...HumanFragment
+  }
+}
+
+fragment HumanFragment on Human {
+  name
+  friends {
+    name
+  }
+  appearsIn,
+  homePlanet
+}
+
+fragment CharacterFragment on Character {
+  name
+  __typename
+  friends {
+    name
+  }
+  appearsIn
+}
+
+mutation createHuman($human: HumanInput!) {
+  createHuman(human: $human) {
+    name
+    homePlanet
+  }
+}
+
+{
+  "vaderId": "2",
+  "human": {
+    "name": "Leia",
+    "homePlanet": "Earth"
+  }
+}
+
+query IntrospectionQuery {
+  __schema {
+    queryType {
+      name
+    }
+    types {
+      name
+      kind
+      fields {
+        name
+        type {
+          name
+          kind
+          ofType {
+            name
+            kind
+          }
+        }
+      }
+    }
+  }
+}

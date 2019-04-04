@@ -4,6 +4,7 @@ import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import "graphiql/graphiql.css";
+import { buildClientSchema, GraphQLSchema, introspectionQuery, getIntrospectionQuery } from "graphql";
 
 const OtherReactComponent = () => (
   <React.Fragment>
@@ -62,6 +63,7 @@ class App extends React.Component {
     const item = localStorage.getItem(key);
     const { query } = item !== null ? JSON.parse(item) : {};
     this.setState({ module: key, query });
+    this.querySchema(key);
   };
 
   fetcher = (graphQLParams) => {
@@ -80,9 +82,28 @@ class App extends React.Component {
     localStorage.setItem(key, JSON.stringify({ ...data, query: value }))
   })
 
+  querySchema = prefix => {
+    console.log('query schema');
+    return fetch(`/graphql/${prefix}`, {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: introspectionQuery }),
+    })
+    .then(response => response.json())
+    .then(({ data }) => {
+      try {
+        const schema = buildClientSchema(data);
+        this.setState({ schema });
+      } catch(e) {
+        console.error(e);
+      }
+    });
+  }
+
   render() {
     return (
       <GraphiQL
+        editorTheme="solarized light"
         fetcher={this.fetcher}
         ref={this.graphiql}
         {...this.state}
